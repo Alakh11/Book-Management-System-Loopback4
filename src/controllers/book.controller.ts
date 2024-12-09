@@ -18,7 +18,7 @@ import {
   response,
 } from '@loopback/rest';
 import {Author, Book} from '../models';
-import {AuthorRepository, BookRepository} from '../repositories';
+import {AuthorRepository, BookRepository, CategoryRepository} from '../repositories';
 
 export class BookController {
   constructor(
@@ -26,6 +26,8 @@ export class BookController {
     public bookRepository: BookRepository,
     @repository(AuthorRepository)
     public authorRepository: AuthorRepository,
+    @repository(CategoryRepository)
+    public categoryRepository: CategoryRepository,
   ) {}
 
   // Example function that uses `id`
@@ -71,6 +73,7 @@ export class BookController {
               genre: {type: 'string'},
               publishedYear: {type: 'number'},
               isbn: {type: 'number'},
+              category: {type: 'string'}
             },
           },
         },
@@ -81,7 +84,8 @@ export class BookController {
         author: string;
         genre: string;
         publishedYear: number;
-        isbn: number
+        isbn: number;
+        category: string;
         },
     ): Promise<Book> {
       try {
@@ -96,6 +100,26 @@ export class BookController {
     //throw new HttpErrors.NotFound(`Author ${bookData.author} not found.`);
   }
 
+  // Log category creation attempt
+  console.log(`Searching for category(genre): ${bookData.genre}`);
+
+  // Fetch the category(genre) record by name (or create it if it doesn't exist)
+  let category = await this.categoryRepository.findOne({
+    where: {name: bookData.genre},
+  });
+
+  if (!category) {
+    console.log(`Category (genre) '${bookData.genre}' not found, creating new category.`);
+     // If category doesn't exist, create a new category
+     category = await this.categoryRepository.create({
+      name: bookData.genre,
+    });
+    //throw new HttpErrors.NotFound(`Category ${bookData.category} not found.`);
+  } else {
+    console.log(`Category (genre) '${category.name}' already exists.`);
+  }
+
+
   // Create the book using authorId
   const book = await this.bookRepository.create({
     title: bookData.title,
@@ -103,6 +127,7 @@ export class BookController {
     publishedYear: bookData.publishedYear,
     isbn: bookData.isbn,
     authorId: author.id, // Use the author's ID
+    categoryId: category.id,
   });
   console.log('Book added successfully:', book);
   return book;
@@ -111,6 +136,7 @@ catch (error) {
   console.error('Error while adding book:', error);
   throw new HttpErrors.UnprocessableEntity('Error adding book: ' + error.message);
   }
+
 }
    /* Promise<Book> {
       try {

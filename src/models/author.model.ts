@@ -11,19 +11,9 @@ export class Author extends Entity {
 
   @property({
     type: 'string',
-    required: false,
+    required: true,
   })
   name: string;
-
-  @property({
-    type: 'string',
-  })
-  createdAt: string;
-
-  @property({
-    type: 'string',
-  })
-  updatedAt: string;
 
 
   constructor(data?: Partial<Author>) {
