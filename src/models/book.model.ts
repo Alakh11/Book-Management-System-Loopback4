@@ -1,6 +1,6 @@
 import {belongsTo, Entity, model, property} from '@loopback/repository';
 import {Author} from './author.model';
-
+import {Category} from './category.model';
 
 @model({name: 'Book'})
 export class Book extends Entity {
@@ -38,15 +38,15 @@ export class Book extends Entity {
   isbn: number;
 
 
+  @belongsTo(() => Category)
+  categoryId: number;
+  public category?: Category;
 
-  @property({
-    type: 'number',
-  })
-  categoryId?: number;
 
   @belongsTo(() => Author)
   authorId: number; // Foreign key referencing the Author model
   public author?: Author;
+
 
   constructor(data?: Partial<Book>) {
     super(data); // LoopBack will handle the creation of the instance

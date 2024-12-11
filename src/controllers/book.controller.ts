@@ -73,7 +73,7 @@ export class BookController {
               genre: {type: 'string'},
               publishedYear: {type: 'number'},
               isbn: {type: 'number'},
-              category: {type: 'string'}
+              //category: {type: 'string'}
             },
           },
         },
@@ -85,7 +85,7 @@ export class BookController {
         genre: string;
         publishedYear: number;
         isbn: number;
-        category: string;
+        //category: string;
         },
     ): Promise<Book> {
       try {
@@ -247,10 +247,28 @@ catch (error) {
   })
   async findBookById(
     @param.path.string('id') id: string,
-  ): Promise<Book & {author?: Author}> {
+  ): Promise<Book> {
     return this.bookRepository.findById(id, {
-      include: [{relation: 'author'}],
+      include: [{relation: 'author'}, {relation: 'category'}],
     });
+  }
+
+  @get('/books/{id}/author', {
+    responses: {
+      '200': {
+        description: 'Author belonging to Book',
+        content: {
+          'application/json': {
+            schema: {type: 'object', items: getModelSchemaRef(Author)},
+          },
+        },
+      },
+    },
+  })
+  async findAuthor(
+    @param.path.number('id') bookId: typeof Book.prototype.id,
+  ): Promise<Author> {
+    return this.bookRepository.author(bookId);
   }
 
 
