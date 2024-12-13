@@ -57,6 +57,7 @@
     "@loopback/service-proxy": "^7.0.8",
     "cors": "^2.8.5",
     "loopback-connector-mysql": "^7.0.17",
+    "newrelic": "^12.8.2",
     "tslib": "^2.0.0"
   },
   "devDependencies": {

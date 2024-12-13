@@ -79,8 +79,8 @@ export class BookController {
 
   if (!author) {
     console.log(`Author '${bookData.author}' not found, creating a new one.`);
-      author = await this.authorRepository.create({name: bookData.author});
-    throw new HttpErrors.NotFound(`Author ${bookData.author} not found.`);
+    author = await this.authorRepository.create({name: bookData.author});
+
   }
 
   // Log category creation attempt
