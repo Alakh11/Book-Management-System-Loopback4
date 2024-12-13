@@ -5,7 +5,8 @@ import {Book} from './book.model';
 export class Category extends Entity {
   @property({
     type: 'number',
-    id: true, // This marks it as the primary key
+    id: true,
+    generated: true,
   })
   id?: number;
 
@@ -24,7 +25,6 @@ export class Category extends Entity {
 }
 
 export interface CategoryRelations {
-  // define navigational properties here
 }
 
 export type CategoryWithRelations = Category & CategoryRelations;

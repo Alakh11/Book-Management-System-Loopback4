@@ -44,23 +44,7 @@ export class BookController {
       },
       },
   })
-  /*
-  async create(
-    @requestBody({
-      content: {
-        'application/json': {
-          schema: getModelSchemaRef(Book, {
-            title: 'NewBook',
-            exclude: ['id'],
-          }),
-        },
-      },
-    })
-       book: Omit<Book, 'id'>,
-  ): Promise<Book> {
-    return this.bookRepository.create(book);
-  }
-*/
+
   async addBook(
     @requestBody({
       content: {
@@ -73,7 +57,6 @@ export class BookController {
               genre: {type: 'string'},
               publishedYear: {type: 'number'},
               isbn: {type: 'number'},
-              //category: {type: 'string'}
             },
           },
         },
@@ -85,10 +68,10 @@ export class BookController {
         genre: string;
         publishedYear: number;
         isbn: number;
-        //category: string;
         },
     ): Promise<Book> {
       try {
+        console.log(`Searching for Authors: ${bookData.author}`);
       // Fetch the author record by name
      let author = await this.authorRepository.findOne({
         where: {name: bookData.author},
@@ -97,7 +80,7 @@ export class BookController {
   if (!author) {
     console.log(`Author '${bookData.author}' not found, creating a new one.`);
       author = await this.authorRepository.create({name: bookData.author});
-    //throw new HttpErrors.NotFound(`Author ${bookData.author} not found.`);
+    throw new HttpErrors.NotFound(`Author ${bookData.author} not found.`);
   }
 
   // Log category creation attempt
@@ -110,11 +93,9 @@ export class BookController {
 
   if (!category) {
     console.log(`Category (genre) '${bookData.genre}' not found, creating new category.`);
-     // If category doesn't exist, create a new category
      category = await this.categoryRepository.create({
       name: bookData.genre,
     });
-    //throw new HttpErrors.NotFound(`Category ${bookData.category} not found.`);
   } else {
     console.log(`Category (genre) '${category.name}' already exists.`);
   }
@@ -138,42 +119,6 @@ catch (error) {
   }
 
 }
-   /* Promise<Book> {
-      try {
-        // Find or create the author
-        let author = await this.authorRepository.findOne({
-          where: { name: bookData.author },
-        });
-
-        if (!author) {
-          // Create the author if not found
-          author = await this.authorRepository.create({ name: bookData.author });
-        }
-
-        // Create the book and link the author
-        const newBook = await this.bookRepository.create({
-          ...bookData,
-          authorId: author.id, // Assign the found or created author's ID
-        });
-
-        return newBook;
-      } catch (error) {
-        console.error('Error while adding book:', error);
-        throw new HttpErrors.InternalServerError('Error adding book');
-      }
-    }*/
-    /*{
-      try {
-        // Create and persist the book
-        const newBook = await this.bookRepository.create(bookData);
-        return {success: true, book: newBook};
-      } catch (error) {
-        console.error('Error while adding book:', error);
-        throw new HttpErrors.InternalServerError('Error adding book');
-      }
-    }
-
-*/
   @get('/books/count')
   @response(200, {
     description: 'Book model count',
@@ -207,14 +152,21 @@ catch (error) {
   async find(@param.filter(Book) filter?: Filter<Book>): Promise<Book[]> {
     try {
       console.log('Fetching books with filter:', filter);
-      const books = await this.bookRepository.find(filter);
+      const books = await this.bookRepository.find({
+        ...filter,
+        include: [{
+           relation: 'author' ,
+           scope: {
+            fields: ['name'],
+          },
+          }]
+      });
       console.log('Books found:', books);
       return books;
     } catch (error) {
       console.error('Error while fetching books:', error);
       throw new HttpErrors.InternalServerError('Error fetching books'+ error.message);
     }
-   // return this.bookRepository.find(filter);
   }
 
   @patch('/books')
@@ -270,13 +222,6 @@ catch (error) {
   ): Promise<Author> {
     return this.bookRepository.author(bookId);
   }
-
-
-    /*
-    @param.filter(Book, {exclude: 'where'}) filter?: FilterExcludingWhere<Book>,
-  ): Promise<Book> {
-    return this.bookRepository.findById(id, filter);
-  }*/
 
   @patch('/books/{id}')
   @response(204, {
