@@ -1,112 +1,134 @@
 import {
   Count,
   CountSchema,
+  Filter,
   repository,
-  Where
+  Where,
 } from '@loopback/repository';
 import {
   del,
   get,
   getModelSchemaRef,
-  getWhereSchemaFor,
   param,
   patch,
   post,
   requestBody,
+  response,
 } from '@loopback/rest';
-import {
-  Author,
-  Book,
-} from '../models';
+import {Author} from '../models';
 import {AuthorRepository} from '../repositories';
 
-export class AuthorBookController {
+export class AuthorController {
   constructor(
     @repository(AuthorRepository)
     public authorRepository: AuthorRepository,
-  ) { }
+  ) {}
 
-  @get('/authors/{id}/books', {
-    responses: {
-      '200': {
-        description: 'Array of Author has many Book',
-        content: {
-          'application/json': {
-            schema: {
-              type: 'array',
-              items: getModelSchemaRef(Book)},
-          },
-        },
-      },
-    },
-  })
-  async findBooks(
-    @param.path.number('id') authorId:typeof Author.prototype.id,
-    //@param.query.object('filter') filter?: Filter<Book>,
-  ): Promise<Book[]> {
-    return this.authorRepository.books(authorId).find();
-  }
-
-  @post('/authors/{id}/books', {
-    responses: {
-      '200': {
-        description: 'Author model instance',
-        content: {'application/json': {schema: getModelSchemaRef(Book)}},
-      },
-    },
+  @post('/authors')
+  @response(200, {
+    description: 'Author model instance',
+    content: {'application/json': {schema: getModelSchemaRef(Author)}},
   })
   async create(
-    @param.path.number('id') authorId: typeof Author.prototype.id,
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Book, {
-            title: 'NewBookInAuthor',
+          schema: getModelSchemaRef(Author, {
             exclude: ['id'],
-            optional: ['authorId']
           }),
         },
       },
-    }) book: Omit<Book, 'id'>,
-  ): Promise<Book> {
-    return this.authorRepository.books(authorId).create(book);
+    })
+    author: Omit<Author, 'id'>,
+  ): Promise<Author> {
+    return this.authorRepository.create(author);
   }
 
-  @patch('/authors/{id}/books', {
-    responses: {
-      '200': {
-        description: 'Author.Book PATCH success count',
-        content: {'application/json': {schema: CountSchema}},
+  @get('/authors/count')
+  @response(200, {
+    description: 'Author model count',
+    content: {'application/json': {schema: CountSchema}},
+  })
+  async count(
+    @param.where(Author) where?: Where<Author>,
+  ): Promise<Count> {
+    return this.authorRepository.count(where);
+  }
+
+  @get('/authors')
+  @response(200, {
+    description: 'Array of Author model instances',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'array',
+          items: getModelSchemaRef(Author, {includeRelations: true}),
+        },
       },
     },
   })
-  async patch(
-    @param.path.number('id') id: number,
+  async find(@param.filter(Author) filter?: Filter<Author>): Promise<Author[]> {
+    return this.authorRepository.find(filter);
+  }
+
+  @patch('/authors')
+  @response(200, {
+    description: 'Author PATCH success count',
+    content: {'application/json': {schema: CountSchema}},
+  })
+  async updateAll(
     @requestBody({
       content: {
         'application/json': {
-          schema: getModelSchemaRef(Book, {partial: true}),
+          schema: getModelSchemaRef(Author, {partial: true}),
         },
       },
     })
-    book: Partial<Book>,
-    @param.query.object('where', getWhereSchemaFor(Book)) where?: Where<Book>,
+    author: Author,
+    @param.where(Author) where?: Where<Author>,
   ): Promise<Count> {
-    return this.authorRepository.books(id).patch(book, where);
+    return this.authorRepository.updateAll(author, where);
   }
 
-  @del('/authors/{id}/books', {
-    responses: {
-      '200': {
-        description: 'Author.Book DELETE success count',
-        content: {'application/json': {schema: CountSchema}},
+  @get('/authors/{id}')
+  @response(200, {
+    description: 'Author model instance',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Author, {includeRelations: true}),
       },
     },
   })
-  async delete(
-    @param.path.number('id') id: number,
-    @param.query.object('where', getWhereSchemaFor(Book)) where?: Where<Book>,
-  ): Promise<Count> {
-    return this.authorRepository.books(id).delete(where);
+  async findById(
+    @param.path.string('id') id: string,
+    @param.filter(Author, {exclude: 'where'}) filter?: Filter<Author>,
+  ): Promise<Author> {
+    return this.authorRepository.findById(id, filter);
+  }
+
+  @patch('/authors/{id}')
+  @response(204, {
+    description: 'Author PATCH success',
+  })
+  async updateById(
+    @param.path.string('id') id: string,
+    @requestBody({
+      content: {
+        'application/json': {
+          schema: getModelSchemaRef(Author, {partial: true}),
+        },
+      },
+    })
+    author: Author,
+  ): Promise<void> {
+    await this.authorRepository.updateById(id, author);
+  }
+
+  @del('/authors/{id}')
+  @response(204, {
+    description: 'Author DELETE success',
+  })
+  async deleteById(@param.path.string('id') id: string): Promise<void> {
+    await this.authorRepository.deleteById(id);
   }
 }

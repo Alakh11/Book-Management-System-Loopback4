@@ -43,7 +43,7 @@ export class Book extends Entity {
 
 
   @belongsTo(() => Author)
-  authorId: number; // Foreign key referencing the Author model
+  authorId: string; // Foreign key referencing the Author model
 
 
   constructor(data?: Partial<Book>) {

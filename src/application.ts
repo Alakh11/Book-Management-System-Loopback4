@@ -8,6 +8,7 @@ import {
 } from '@loopback/rest-explorer';
 import {ServiceMixin} from '@loopback/service-proxy';
 import path from 'path';
+import {AuthorController, BookController} from './controllers';
 import {MysqlDataSource} from './datasources';
 import {MySequence} from './sequence';
 
@@ -49,7 +50,8 @@ export class BookmanagementsystemApplication extends BootMixin(
     this.dataSource(MysqlDataSource);
 
     this.projectRoot = __dirname;
-    //this.controller(BookController);
+    this.controller(BookController);
+    this.controller(AuthorController);
     // Customize @loopback/boot Booter Conventions here
     this.bootOptions = {
       controllers: {

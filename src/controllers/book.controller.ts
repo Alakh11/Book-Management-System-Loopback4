@@ -51,6 +51,7 @@ export class BookController {
         'application/json': {
           schema: {
             type: 'object',
+            required: ['title', 'author', 'genre', 'publishedYear', 'isbn'],
             properties: {
               title: {type: 'string'},
               author: {type: 'string'},
@@ -71,10 +72,16 @@ export class BookController {
         },
     ): Promise<Book> {
       try {
-        console.log(`Searching for Authors: ${bookData.author}`);
+        if (!bookData.author) {
+          throw new HttpErrors.BadRequest('Author name is required.');
+        }
+        if (!bookData.genre) {
+          throw new HttpErrors.BadRequest('Genre is required.');
+        }
+      console.log(`Searching for Authors: ${bookData.author}`);
       // Fetch the author record by name
-     let author = await this.authorRepository.findOne({
-        where: {name: bookData.author},
+      let author = await this.authorRepository.findOne({
+       where: {name: bookData.author},
   });
 
   if (!author) {
@@ -93,8 +100,8 @@ export class BookController {
 
   if (!category) {
     console.log(`Category (genre) '${bookData.genre}' not found, creating new category.`);
-     category = await this.categoryRepository.create({
-      name: bookData.genre,
+    category = await this.categoryRepository.create({
+    name: bookData.genre,
     });
   } else {
     console.log(`Category (genre) '${category.name}' already exists.`);

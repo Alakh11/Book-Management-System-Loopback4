@@ -1,14 +1,14 @@
-import {Entity, model, property, hasMany} from '@loopback/repository';
+import {Entity, hasMany, model, property} from '@loopback/repository';
 import {Book} from './book.model';
 
 @model()
 export class Author extends Entity {
   @property({
-    type: 'number',
+    type: 'string',
     id: true,  // This makes it the ID field
     generated: true,
   })
-  id?: number;
+  id?: string;
 
   @property({
     type: 'string',
