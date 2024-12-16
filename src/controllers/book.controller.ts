@@ -117,7 +117,7 @@ export class BookController {
     authorId: author.id, // Use the author's ID
     categoryId: category.id,
   });
-  console.log('Book added successfully:', book);
+  console.log('Book added successfully:\n', book);
   return book;
 }
 catch (error) {

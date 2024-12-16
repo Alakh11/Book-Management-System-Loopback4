@@ -1,7 +1,7 @@
-import {inject, Getter} from '@loopback/core';
-import {DefaultCrudRepository, juggler, repository, HasManyRepositoryFactory} from '@loopback/repository';
-import {Author, AuthorRelations, Book} from '../models';
-import {BookRepository} from './book.repository';
+import { Getter, inject } from '@loopback/core';
+import { DefaultCrudRepository, HasManyRepositoryFactory, juggler, repository } from '@loopback/repository';
+import { Author, AuthorRelations, Book } from '../models';
+import { BookRepository } from './book.repository';
 
 export class AuthorRepository extends DefaultCrudRepository<
   Author,
@@ -12,7 +12,8 @@ export class AuthorRepository extends DefaultCrudRepository<
   public readonly books: HasManyRepositoryFactory<Book, typeof Author.prototype.id>;
 
   constructor(
-    @inject('datasources.mysql') dataSource: juggler.DataSource, @repository.getter('BookRepository') protected bookRepositoryGetter: Getter<BookRepository>,
+    @inject('datasources.mysql') dataSource: juggler.DataSource,
+    @repository.getter('BookRepository') protected bookRepositoryGetter: Getter<BookRepository>,
    // @repository(BookRepository) public bookRepository: BookRepository,
   ) {
     super(Author, dataSource);
